@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        .container {
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 80%;
+            max-width: 1000px;
+            text-align: center;
+            padding: 20px;
+            margin: 20px auto;
+        }
+
+        h2 {
+            color: #309f30;
+            margin-bottom: 20px;
+            text-align: left; /* Alinear a la izquierda */
+            margin-left: 20px; /* Margen izquierdo para alinear con el borde */
+        }
+
+        form {
+            margin-bottom: 30px;
+            text-align: right; /* Alinear a la derecha */
+            margin-right: 20px; /* Margen derecho para alinear con el borde */
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        input[type="submit"] {
+            background-color: #309f30;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #1c591c;
+        }
+
+        .result {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .section {
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 10px;
+            color: #309f30;
+            text-align: left; /* Alinear a la izquierda */
+            margin-left: 20px; /* Margen izquierdo para alinear con el borde */
+        }
+
+        .section table, .section pre {
+            width: 100%;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        .section table {
+            border-collapse: collapse;
+        }
+
+        .section th, .section td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .section th {
+            background-color: #309f30;
+            color: white;
+        }
+
+        .section tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .counts {
+            margin-top: 10px;
+        }
+        p{
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align: left;">Analizador</h2>
+        <form method="POST" style="text-align: right; margin-right: 20px;">
+            <textarea name="code" rows="10" cols="50">{{ request.form.code if request.method == 'POST' else '' }}</textarea><br>
+            <input type="submit" value="Analizar">
+        </form>
+        <div class="result">
+            <div class="section">
+                <h2 style="text-align: left;">Análisis Léxico</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Palabra reservada</th>
+                            <th>Identificador</th>
+                            <th>Número</th>
+                            <th>Símbolo</th>
+                            <th>Paréntesis izquierdo</th>
+                            <th>Paréntesis derecho</th>
+                            <th>Llave izquierda</th>
+                            <th>Llave derecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for token in tokens %}
+                        <tr>
+                            <td>{{ token.value }}</td>
+                            <td>{{ 'X' if token.type in ['FOR', 'VAR', 'CONSOLE', 'LOG', 'GLOBAL', 'INT', 'SYSTEM', 'PRINTLN', 'OUT'] else '' }}</td>
+                            <td>{{ 'X' if token.type == 'ID' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'NUMBER' else '' }}</td>
+                            <td>{{ 'X' if token.type in ['PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'ASSIGN', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'DOT', 'SEMICOLON', 'COMMA', 'SINGLE_QUOTE'] else '' }}</td>
+                            <td>{{ 'X' if token.type == 'LPAREN' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'RPAREN' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'LBRACE' else '' }}</td>
+                            <td>{{ 'X' if token.type == 'RBRACE' else '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <br><br>
+                <div class="counts">
+                    <p>Palabras reservadas:   {{ counts.reserved }}</p>
+                    <p>Identificadores:   {{ counts.id }}</p>
+                    <p>Números:   {{ counts.number }}</p>
+                    <p>Símbolos:   {{ counts.symbol }}</p>
+                    <p>Paréntesis izquierdos:   {{ counts.lparen }}</p>
+                    <p>Paréntesis derechos:   {{ counts.rparen }}</p>
+                    <p>Llaves izquierdas:   {{ counts.lbrace }}</p>
+                    <p>Llaves derechas:   {{ counts.rbrace }}</p>
+                </div>
+            </div>
+            <div class="section">
+                <h2 style="text-align: left;">Análisis Sintáctico</h2>
+                <pre>{{ syntax_result }}</pre>
+            </div>
+            <div class="section">
+                <h2 style="text-align: left;">Análisis Semántico</h2>
+                <p>{{ semantic_result }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
